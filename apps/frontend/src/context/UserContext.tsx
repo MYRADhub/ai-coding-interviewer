@@ -14,7 +14,7 @@ export const dummyUser: User = {
   avatarUrl: "https://ui-avatars.com/api/?name=Murad",
 };
 
-export const UserContext = createContext<User>(dummyUser);
+export const UserContext = createContext<User | null>(null);
 
 export function useCurrentUser() {
   return useContext(UserContext);
