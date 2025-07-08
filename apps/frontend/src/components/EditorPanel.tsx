@@ -13,7 +13,7 @@ export default function EditorPanel() {
   };
 
   return (
-    <div className="w-1/2 h-full p-4 flex flex-col">
+    <div className="w-1/2 h-full p-4 box-border flex flex-col">
       <div className="flex-1 border rounded mb-2 overflow-hidden">
         <CodeEditor value={code} onChange={(value) => setCode(value ?? "")} />
       </div>

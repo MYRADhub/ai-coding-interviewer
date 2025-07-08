@@ -4,9 +4,9 @@ import EditorPanel from "../components/EditorPanel";
 
 export default function PracticePage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-full">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 h-full overflow-hidden">
         <ProblemDescription />
         <EditorPanel />
       </div>
