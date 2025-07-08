@@ -4,7 +4,7 @@ type Props = {
 
 export default function RunButton({ onClick }: Props) {
   return (
-    <button onClick={onClick} className="my-2 px-4 py-2 bg-blue-600 text-white rounded">
+    <button onClick={onClick} className="bg-[var(--primary)] text-black py-2 px-4 rounded font-semibold">
       Run
     </button>
   );

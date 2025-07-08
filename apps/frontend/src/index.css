@@ -30,6 +30,9 @@
   .border-app {
     border-color: var(--border);
   }
+  .text-muted {
+    color: var(--text-muted);
+  }
 }
 
 html, body, #root {

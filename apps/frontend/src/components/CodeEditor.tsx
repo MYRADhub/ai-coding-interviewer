@@ -10,7 +10,7 @@ export default function CodeEditor({ value, onChange }: Props) {
     <Editor
       height="100%"
       defaultLanguage="python"
-      theme="vs-light"
+      theme="vs-dark"
       value={value}
       onChange={onChange}
       options={{
