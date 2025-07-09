@@ -12,7 +12,7 @@ export default function HomePage() {
           <InterviewCard
             title="Coding Interview"
             description="Practice solving problems with an AI interviewer."
-            onClick={() => navigate("/practice")}
+            onClick={() => navigate("/coding")}
           />
           <InterviewCard
             title="System Design"
