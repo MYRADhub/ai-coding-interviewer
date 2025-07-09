@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 import ProblemDescription from "../components/ProblemDescription";
 import EditorPanel from "../components/EditorPanel";
 
-export default function PracticePage() {
+export default function CodingInterview() {
   return (
     <div className="flex flex-col h-full bg-bg text-app">
       <Navbar />
