@@ -1,11 +1,5 @@
 import { createContext, useContext } from "react";
-
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl?: string;
-};
+import type { User } from "../utils/types";
 
 export const dummyUser: User = {
   id: "user_001",
