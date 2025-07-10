@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Message = {
   sender: "user" | "agent";
@@ -13,6 +13,14 @@ export default function ChatPanel() {
     },
   ]);
   const [input, setInput] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -35,7 +43,10 @@ export default function ChatPanel() {
   return (
     <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full">
       {/* Chat bubbles */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto space-y-2 pr-1"
+      >
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -49,6 +60,7 @@ export default function ChatPanel() {
           </div>
         ))}
       </div>
+
 
       {/* Input box */}
       <div className="mt-2 flex">
