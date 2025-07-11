@@ -8,7 +8,11 @@ type TestCase = {
   passed: boolean | null;
 };
 
-export default function OutputPanel() {
+type Props = {
+  output: string;
+};
+
+export default function OutputPanel({ output }: Props) {
   const [testCases, setTestCases] = useState<TestCase[]>([
     {
       id: 1,
@@ -27,7 +31,6 @@ export default function OutputPanel() {
   ]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const selected = testCases[selectedIndex];
 
   return (
     <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full">
@@ -65,17 +68,7 @@ export default function OutputPanel() {
 
       {/* Output area */}
       <div className="flex-1 bg-app-light border border-app rounded p-3 text-sm text-app overflow-y-auto">
-        <p><strong>Input:</strong> {selected.input || "Not set"}</p>
-        <p><strong>Expected:</strong> {selected.expected || "Not set"}</p>
-        <p><strong>Actual:</strong> {selected.actual || "⏳ Not run yet"}</p>
-        <p>
-          <strong>Result:</strong>{" "}
-          {selected.passed === null
-            ? "Pending"
-            : selected.passed
-            ? "✅ Passed"
-            : "❌ Failed"}
-        </p>
+        {output || "Run your code to see results."}
       </div>
     </div>
   );
