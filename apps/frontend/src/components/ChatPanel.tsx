@@ -6,6 +6,9 @@ type Message = {
   text: string;
 };
 
+// TODO: Have to work on how we handle the formatting of the messages
+// and how we send the problem and code to the backend, it's too ugly right now
+
 export default function ChatPanel({ problem, code }: { problem: Problem; code: string }) {
   const [messages, setMessages] = useState<Message[]>([
     {
