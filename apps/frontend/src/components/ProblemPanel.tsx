@@ -1,20 +1,11 @@
 import type { Problem } from "../utils/types";
 
-const mockProblem: Problem = {
-  id: "3098",
-  title: "Find the Sum of Subsequence Powers",
-  description:
-    "You are given an integer array nums of length n, and a positive integer k. Return the sum of powers of all subsequences of length k.",
-  examples: [
-    {
-      input: "nums = [1,2,3,4], k = 3",
-      output: "5",
-    },
-  ],
+type Props = {  
+  problem: Problem;
 };
 
-export default function ProblemPanel() {
-  const { id, title, description, examples } = mockProblem;
+export default function ProblemPanel({ problem }: Props) {
+  const { id, title, description, examples } = problem;
 
   return (
     <div className="border border-app bg-app-dark rounded p-4 overflow-y-auto">

@@ -3,11 +3,12 @@ import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
 
 type Props = {
+  code: string;
+  setCode: (code: string) => void;
   setOutput: (output: string) => void;
-};
+};``
 
-export default function CodeEditorPanel({ setOutput }: Props) {
-    const [code, setCode] = useState("# Write your code here...");
+export default function CodeEditorPanel({ code, setCode, setOutput }: Props) {
     const [language, setLanguage] = useState("python");
 
     const runCode = async () => {

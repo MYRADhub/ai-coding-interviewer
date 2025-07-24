@@ -1,17 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import type { Problem } from "../utils/types";
 
 type Message = {
   sender: "user" | "agent";
   text: string;
 };
 
-// Dummy problem info for now (replace with real one if needed)
-const problem = {
-  title: "Find the Sum of Subsequence Powers",
-  description: "You are given an integer array nums of length n...",
-};
-
-export default function ChatPanel() {
+export default function ChatPanel({ problem, code }: { problem: Problem; code: string }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "agent",
@@ -47,7 +42,7 @@ export default function ChatPanel() {
       const res = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, problem }),
+        body: JSON.stringify({ messages: apiMessages, problem, code }),
       });
       const data = await res.json();
       const reply = data.reply || "Sorry, I couldn't generate a response.";

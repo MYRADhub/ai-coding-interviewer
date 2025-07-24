@@ -61,19 +61,30 @@ require("dotenv").config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.post("/api/chat", async (req, res) => {
-  const { messages, problem } = req.body;
+  const { messages, problem, code } = req.body;
 
-  if (!messages || !problem) {
-    return res.status(400).json({ error: "Missing messages or problem" });
+  if (!messages || !problem || !code) {
+    return res.status(400).json({ error: "Missing messages, problem, or code" });
   }
 
   const systemPrompt = `
-You are an experienced software engineer conducting a real-time coding interview.
+You are a technical interviewer for a software engineering position.
 
-Your tone is supportive but professional. Present the problem naturally, offer guidance without giving full solutions, and assess code if the candidate asks for review.
+The candidate is working on this problem:
+---
+${problem.title}
+${problem.description}
+---
 
-Problem title: "${problem.title}"
-Problem description: ${problem.description}
+Their current code is:
+---
+${code || "[no code submitted yet]"}
+---
+
+Here is the chat history:
+${messages.map(m => `[${m.sender}]: ${m.text}`).join('\n')}
+
+The latest message from the candidate is the last user entry above. Respond as a human interviewer would.
 `;
 
   const chatMessages = [
