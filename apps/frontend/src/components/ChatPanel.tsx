@@ -5,6 +5,12 @@ type Message = {
   text: string;
 };
 
+// Dummy problem info for now (replace with real one if needed)
+const problem = {
+  title: "Find the Sum of Subsequence Powers",
+  description: "You are given an integer array nums of length n...",
+};
+
 export default function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -13,6 +19,7 @@ export default function ChatPanel() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,23 +28,42 @@ export default function ChatPanel() {
     }
   }, [messages]);
 
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
 
     // Add user message
-    const newMessages: Message[] = [...messages, { sender: "user" as const, text: input }];
+    const newMessages: Message[] = [...messages, { sender: "user", text: input }];
     setMessages(newMessages);
     setInput("");
+    setLoading(true);
 
-    // Mock Agent response with delay
-    setTimeout(() => {
-      const agentReply = {
-        sender: "agent" as const,
-        text: "Thanks for your response. Can you elaborate on your approach?",
-      };
-      setMessages((prev) => [...prev, agentReply]);
-    }, 1000);
+    try {
+      // Prepare request: convert "agent" to "ai" or "assistant" for backend
+      const apiMessages = newMessages.map((msg) => ({
+        sender: msg.sender === "agent" ? "ai" : "user",
+        text: msg.text,
+      }));
+
+      const res = await fetch("http://localhost:3001/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages, problem }),
+      });
+      const data = await res.json();
+      const reply = data.reply || "Sorry, I couldn't generate a response.";
+
+      setMessages((prev) => [
+        ...prev,
+        { sender: "agent", text: reply },
+      ]);
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "agent", text: "⚠️ Sorry, there was a problem contacting the AI." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,8 +85,10 @@ export default function ChatPanel() {
             {msg.text}
           </div>
         ))}
+        {loading && (
+          <div className="text-app-muted italic self-start px-3 py-2 text-sm">AI is typing...</div>
+        )}
       </div>
-
 
       {/* Input box */}
       <div className="mt-2 flex">
@@ -73,10 +101,12 @@ export default function ChatPanel() {
           onKeyDown={(e) => {
             if (e.key === "Enter") sendMessage();
           }}
+          disabled={loading}
         />
         <button
           className="px-4 py-2 text-sm rounded bg-[var(--primary)] text-black"
           onClick={sendMessage}
+          disabled={loading}
         >
           Send
         </button>
