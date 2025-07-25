@@ -1,34 +1,8 @@
 import { useState } from "react";
+import { useInterviewSession } from "../context/InterviewSessionContext";
 
-type TestCase = {
-  id: number;
-  input: string;
-  expected: string;
-  actual: string;
-  passed: boolean | null;
-};
-
-type Props = {
-  output: string;
-};
-
-export default function OutputPanel({ output }: Props) {
-  const [testCases, setTestCases] = useState<TestCase[]>([
-    {
-      id: 1,
-      input: "1 2 3",
-      expected: "6",
-      actual: "",
-      passed: null,
-    },
-    {
-      id: 2,
-      input: "4 5 6",
-      expected: "15",
-      actual: "",
-      passed: null,
-    },
-  ]);
+export default function OutputPanel() {
+  const { testCases, setTestCases } = useInterviewSession();
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -68,7 +42,7 @@ export default function OutputPanel({ output }: Props) {
 
       {/* Output area */}
       <div className="flex-1 bg-app-light border border-app rounded p-3 text-sm text-app overflow-y-auto">
-        {output || "Run your code to see results."}
+        {"Run your code to see results."}
       </div>
     </div>
   );

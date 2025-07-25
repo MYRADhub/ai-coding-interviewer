@@ -1,10 +1,7 @@
-import type { Problem } from "../utils/types";
+import { useInterviewSession } from "../context/InterviewSessionContext";
 
-type Props = {  
-  problem: Problem;
-};
-
-export default function ProblemPanel({ problem }: Props) {
+export default function ProblemPanel() {
+  const { problem } = useInterviewSession();
   const { id, title, description, examples } = problem;
 
   return (

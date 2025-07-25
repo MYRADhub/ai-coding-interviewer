@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Problem } from "../utils/types";
+import { useInterviewSession } from "../context/InterviewSessionContext";
 
 type Message = {
   sender: "user" | "agent";
@@ -9,7 +9,8 @@ type Message = {
 // TODO: Have to work on how we handle the formatting of the messages
 // and how we send the problem and code to the backend, it's too ugly right now
 
-export default function ChatPanel({ problem, code }: { problem: Problem; code: string }) {
+export default function ChatPanel() {
+  const { problem, code } = useInterviewSession();
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "agent",

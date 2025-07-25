@@ -1,14 +1,10 @@
 import { useState } from "react";
 import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
+import { useInterviewSession } from "../context/InterviewSessionContext";
 
-type Props = {
-  code: string;
-  setCode: (code: string) => void;
-  setOutput: (output: string) => void;
-};``
-
-export default function CodeEditorPanel({ code, setCode, setOutput }: Props) {
+export default function CodeEditorPanel() {
+    const { code, setCode } = useInterviewSession();
     const [language, setLanguage] = useState("python");
 
     const runCode = async () => {
@@ -24,7 +20,7 @@ export default function CodeEditorPanel({ code, setCode, setOutput }: Props) {
       console.log(data);
 
       if (data.success) {
-        setOutput(data.output);
+        alert(`Output:\n${data.output}`);
       } else {
         alert(`Error:\n${data.output}`);
       }

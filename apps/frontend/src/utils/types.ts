@@ -14,3 +14,11 @@ export type User = {
   email: string;
   avatarUrl?: string;
 };
+
+export type TestCase = {
+  id: number;
+  input: string;
+  expected: string;
+  actual: string;
+  passed: boolean | null;
+};
