@@ -16,6 +16,8 @@ type InterviewSessionContextType = {
   setProblem: React.Dispatch<React.SetStateAction<Problem>>;
   testCases: TestCase[];
   setTestCases: React.Dispatch<React.SetStateAction<TestCase[]>>;
+  selectedTestIndex: number;
+  setSelectedTestIndex: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const defaultProblem: Problem = {
@@ -42,13 +44,15 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     { id: 1, input: "1 2 3", expected: "6", actual: "", passed: null },
     { id: 2, input: "4 5 6", expected: "15", actual: "", passed: null },
   ]);
+  const [selectedTestIndex, setSelectedTestIndex] = useState(0);
 
   return (
     <InterviewSessionContext.Provider
       value={{
         code, setCode,
         problem, setProblem,
-        testCases, setTestCases
+        testCases, setTestCases,
+        selectedTestIndex, setSelectedTestIndex,
       }}
     >
       {children}
