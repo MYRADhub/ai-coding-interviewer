@@ -1,13 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
-import type { Problem } from "../utils/types";
+import type { Problem, TestCase, Message } from "../utils/types";
 
-export type TestCase = {
-  id: number;
-  input: string;
-  expected: string;
-  actual?: string;
-  passed?: boolean | null;
-};
+
 
 type InterviewSessionContextType = {
   code: string;
@@ -18,6 +12,8 @@ type InterviewSessionContextType = {
   setTestCases: React.Dispatch<React.SetStateAction<TestCase[]>>;
   selectedTestIndex: number;
   setSelectedTestIndex: React.Dispatch<React.SetStateAction<number>>;
+  chatMessages: Message[];
+  setChatMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 };
 
 const defaultProblem: Problem = {
@@ -45,6 +41,12 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     { id: 2, input: "4 5 6", expected: "15", actual: "", passed: null },
   ]);
   const [selectedTestIndex, setSelectedTestIndex] = useState(0);
+  const [chatMessages, setChatMessages] = useState<Message[]>([
+    {
+      sender: "agent",
+      text: "Hi, I'm your AI interviewer. Let's start! Can you solve this problem for me?",
+    },
+  ]);
 
   return (
     <InterviewSessionContext.Provider
@@ -53,6 +55,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
         problem, setProblem,
         testCases, setTestCases,
         selectedTestIndex, setSelectedTestIndex,
+        chatMessages, setChatMessages
       }}
     >
       {children}

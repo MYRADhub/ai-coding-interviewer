@@ -6,57 +6,58 @@ type Message = {
   text: string;
 };
 
-// TODO: Have to work on how we handle the formatting of the messages
-// and how we send the problem and code to the backend, it's too ugly right now
-
 export default function ChatPanel() {
-  const { problem, code } = useInterviewSession();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: "agent",
-      text: "👋 Hi, I'm your AI interviewer. Let's start! Can you solve this problem for me?",
-    },
-  ]);
+  const {
+    problem,
+    code,
+    testCases,
+    chatMessages,
+    setChatMessages,
+  } = useInterviewSession();
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Always scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [chatMessages]);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
-    // Add user message
-    const newMessages: Message[] = [...messages, { sender: "user", text: input }];
-    setMessages(newMessages);
+    const newUserMsg: Message = { sender: "user", text: input };
+    const updatedMessages = [...chatMessages, newUserMsg];
+    setChatMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
     try {
-      // Prepare request: convert "agent" to "ai" or "assistant" for backend
-      const apiMessages = newMessages.map((msg) => ({
-        sender: msg.sender === "agent" ? "ai" : "user",
-        text: msg.text,
-      }));
+      // Compose full interview session context for the AI
+      const payload = {
+        problem,
+        code,
+        testCases,
+        messages: updatedMessages.map(msg => ({
+          sender: msg.sender === "agent" ? "ai" : "user",
+          text: msg.text,
+        })),
+      };
 
       const res = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, problem, code }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
-      const reply = data.reply || "Sorry, I couldn't generate a response.";
 
-      setMessages((prev) => [
-        ...prev,
-        { sender: "agent", text: reply },
-      ]);
+      const aiReply = data.reply || "Sorry, I couldn't generate a response.";
+      setChatMessages(prev => [...prev, { sender: "agent", text: aiReply }]);
     } catch (e) {
-      setMessages((prev) => [
+      setChatMessages(prev => [
         ...prev,
         { sender: "agent", text: "⚠️ Sorry, there was a problem contacting the AI." },
       ]);
@@ -72,7 +73,7 @@ export default function ChatPanel() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto space-y-2 pr-1"
       >
-        {messages.map((msg, i) => (
+        {chatMessages.map((msg, i) => (
           <div
             key={i}
             className={`max-w-[80%] px-3 py-2 rounded text-sm ${

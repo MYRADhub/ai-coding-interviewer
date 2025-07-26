@@ -22,3 +22,8 @@ export type TestCase = {
   actual: string;
   passed: boolean | null;
 };
+
+export type Message = {
+  sender: "user" | "agent";
+  text: string;
+};
