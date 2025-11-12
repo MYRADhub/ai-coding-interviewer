@@ -56,7 +56,7 @@ export default function ChatPanel() {
 
       const aiReply = data.reply || "Sorry, I couldn't generate a response.";
       setChatMessages(prev => [...prev, { sender: "agent", text: aiReply }]);
-    } catch (e) {
+    } catch {
       setChatMessages(prev => [
         ...prev,
         { sender: "agent", text: "⚠️ Sorry, there was a problem contacting the AI." },
