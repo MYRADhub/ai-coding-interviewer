@@ -131,11 +131,21 @@ require("dotenv").config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.post("/api/chat", async (req, res) => {
-  const { messages, problem, code, validationResult } = req.body;
+  const { messages, problem, code, validationResult, language } = req.body;
 
   if (!messages || !problem || !code) {
     return res.status(400).json({ error: "Missing messages, problem, or code" });
   }
+
+  const constraintList = Array.isArray(problem?.details?.constraints)
+    ? problem.details.constraints.map((item) => `- ${item}`).join("\n")
+    : null;
+  const hints = Array.isArray(problem?.details?.hints)
+    ? problem.details.hints.map((item) => `- ${item}`).join("\n")
+    : null;
+  const followUps = Array.isArray(problem?.details?.followUps)
+    ? problem.details.followUps.map((item) => `- ${item}`).join("\n")
+    : null;
 
   const validationSummary = validationResult
     ? `Test status: ${validationResult.status} (${validationResult.passedCount ?? 0}/${
@@ -155,6 +165,21 @@ The candidate is working on this problem:
 ${problem.title}
 ${problem.description}
 ---
+Difficulty: ${problem.difficulty}
+Core topics: ${(problem.topics || []).join(", ")}
+Preferred language: ${language || problem.defaultLanguage || "python"}
+
+Additional context:
+${problem.details?.markdown ?? "N/A"}
+
+Constraints:
+${constraintList ?? "Not specified"}
+
+Hints:
+${hints ?? "N/A"}
+
+Follow-up ideas:
+${followUps ?? "N/A"}
 
 Their current code is:
 ---

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useInterviewSession } from "../context/InterviewSessionContext";
 
 type Message = {
@@ -14,6 +16,7 @@ export default function ChatPanel() {
     chatMessages,
     setChatMessages,
     validationResult,
+    language,
   } = useInterviewSession();
 
   const [input, setInput] = useState("");
@@ -43,6 +46,7 @@ export default function ChatPanel() {
         code,
         testCases,
         validationResult,
+        language,
         messages: updatedMessages.map(msg => ({
           sender: msg.sender === "agent" ? "ai" : "user",
           text: msg.text,
@@ -84,7 +88,12 @@ export default function ChatPanel() {
                 : "bg-app-light text-app self-start"
             }`}
           >
-            {msg.text}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              className="space-y-1 leading-relaxed text-sm markdown-body"
+            >
+              {msg.text}
+            </ReactMarkdown>
           </div>
         ))}
         {loading && (

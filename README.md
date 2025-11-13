@@ -14,12 +14,18 @@ Users can solve coding challenges in a realistic coding environment, chat with a
   ✍️ Powered by Monaco (same editor as VSCode).  
   Supports Python and JavaScript with syntax highlighting, autocomplete, and more.
 
+- **Language-Aware Starter Templates**  
+  📄 Every problem ships with function signatures, docstrings, and IO scaffolding for Python & JavaScript so you can focus on the core algorithm.
+
 - **Custom Test Cases**  
   🧪 Add and manage test cases just like in LeetCode/HackerRank.  
   See pass/fail results in real-time.
 
 - **Interactive Chat Panel**  
-  💬 Persistent conversation with AI. Includes code, problem context, and test results in its reasoning.
+  💬 Persistent conversation with AI. The interviewer now sees extended problem briefs, constraints, and your latest validation status—and renders markdown richly inside the chat bubble.
+
+- **Progress Dashboard**  
+  📊 The home page summarizes which problems are solved/needs-work based on your last validation run, all stored locally per problem/language.
 
 - **Local Persistence**  
   💾 Everything (code, test cases, chat) autosaves in `localStorage`. Refresh without losing progress.

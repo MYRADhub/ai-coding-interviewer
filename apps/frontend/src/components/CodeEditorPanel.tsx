@@ -10,11 +10,12 @@ export default function CodeEditorPanel() {
     testCases,
     setTestCases,
     problem,
+    language,
+    setLanguage,
     setValidationResult,
     invalidateValidation,
   } = useInterviewSession();
 
-  const [language, setLanguage] = useState("python");
   const [loading, setLoading] = useState(false);
 
   const runCode = async () => {
@@ -118,7 +119,12 @@ export default function CodeEditorPanel() {
         <RunButton onClick={runCode} disabled={loading} />
         <select
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => {
+            const nextLang = e.target.value as typeof language;
+            if (nextLang === language) return;
+            invalidateValidation();
+            setLanguage(nextLang);
+          }}
           className="bg-app-light border border-app rounded text-sm px-2 py-1"
           disabled={loading}
         >
@@ -128,6 +134,7 @@ export default function CodeEditorPanel() {
       </div>
       <CodeEditor
         value={code}
+        language={language}
         onChange={(value) => {
           invalidateValidation();
           setCode(value ?? "");

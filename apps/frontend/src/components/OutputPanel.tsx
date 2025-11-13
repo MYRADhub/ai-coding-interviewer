@@ -11,6 +11,13 @@ export default function OutputPanel() {
   } = useInterviewSession();
 
   const selected = testCases[selectedTestIndex];
+  if (!selected) {
+    return (
+      <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full items-center justify-center text-app-muted text-sm">
+        No test cases defined.
+      </div>
+    );
+  }
 
   // Add a test case
   const addTestCase = () => {
@@ -19,6 +26,7 @@ export default function OutputPanel() {
       ...prev,
       {
         id: Date.now(),
+        label: `Custom ${prev.length + 1}`,
         input: "",
         expected: "",
         actual: "",
@@ -79,7 +87,8 @@ export default function OutputPanel() {
                 : "bg-app-light opacity-80"
             }`}
           >
-            Test {i + 1}
+            {test.label ?? `Test ${i + 1}`}
+            {test.hidden && <span className="ml-2 text-xs text-app-muted">👁‍🗨</span>}
             {testCases.length > 1 && (
               <button
                 onClick={e => {

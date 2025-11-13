@@ -1,8 +1,10 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useInterviewSession } from "../context/InterviewSessionContext";
 
 export default function ProblemPanel() {
   const { problem, availableProblems, selectProblem, validationResult } = useInterviewSession();
-  const { id, title, description, examples } = problem;
+  const { id, title, description, examples, difficulty, topics, details } = problem;
   const renderStatus = () => {
     switch (validationResult.status) {
       case "passed":
@@ -45,8 +47,23 @@ export default function ProblemPanel() {
       <h2 className="font-bold text-lg mb-1">
         {id}. {title}
       </h2>
-      <div className="mb-4">{renderStatus()}</div>
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+        {renderStatus()}
+        <span className="text-xs uppercase tracking-wide text-app-muted">{difficulty}</span>
+      </div>
       <p className="text-sm text-app-muted mb-4">{description}</p>
+      {topics?.length ? (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {topics.map((topic) => (
+            <span
+              key={topic}
+              className="text-xs border border-app rounded-full px-3 py-1 text-app-muted"
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       <div className="text-sm bg-app-light border border-app rounded p-3">
         {examples.map((ex, i) => (
@@ -60,6 +77,26 @@ export default function ProblemPanel() {
           </div>
         ))}
       </div>
+      {details?.markdown && (
+        <div className="mt-4 text-sm border border-app rounded p-3 bg-app-light">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            className="space-y-2 leading-relaxed markdown-body"
+          >
+            {details.markdown}
+          </ReactMarkdown>
+        </div>
+      )}
+      {details?.constraints && (
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold mb-1">Constraints</h4>
+          <ul className="text-sm text-app-muted list-disc list-inside space-y-1">
+            {details.constraints.map((constraint, idx) => (
+              <li key={idx}>{constraint}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,36 @@
+export type Language = "python" | "javascript";
+
+export type ProblemExample = {
+  input: string;
+  output: string;
+  explanation?: string;
+};
+
+export type ProblemTestTemplate = {
+  label?: string;
+  input: string;
+  expected: string;
+  hidden?: boolean;
+};
+
+export type ProblemDetails = {
+  markdown?: string;
+  constraints?: string[];
+  followUps?: string[];
+  hints?: string[];
+};
+
 export type Problem = {
   id: string;
   title: string;
   description: string;
-  examples: {
-    input: string;
-    output: string;
-  }[];
+  difficulty: "Easy" | "Medium" | "Hard";
+  topics: string[];
+  defaultLanguage?: Language;
+  examples: ProblemExample[];
+  sampleTests: ProblemTestTemplate[];
+  starterCode: Partial<Record<Language, string>>;
+  details?: ProblemDetails;
 };
 
 export type User = {
@@ -17,10 +42,12 @@ export type User = {
 
 export type TestCase = {
   id: number;
+  label?: string;
   input: string;
   expected: string;
   actual: string;
   passed: boolean | null;
+  hidden?: boolean;
 };
 
 export type ValidationResultStatus = "idle" | "passed" | "failed";

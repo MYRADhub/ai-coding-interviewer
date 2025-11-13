@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import type { Problem, TestCase, Message, ValidationResult } from "../utils/types";
+import type { Problem, TestCase, Message, ValidationResult, Language } from "../utils/types";
 import { problems, defaultProblem } from "../data/problems";
 import {
   readPersistedData,
@@ -10,10 +10,12 @@ import {
 
 type InterviewSessionContextType = {
   code: string;
-  setCode: React.Dispatch<React.SetStateAction<string>>;
+  setCode: (value: string) => void;
   problem: Problem;
   availableProblems: Problem[];
   selectProblem: (problemId: string) => void;
+  language: Language;
+  setLanguage: (language: Language) => void;
   testCases: TestCase[];
   setTestCases: React.Dispatch<React.SetStateAction<TestCase[]>>;
   selectedTestIndex: number;
@@ -25,12 +27,31 @@ type InterviewSessionContextType = {
   invalidateValidation: () => void;
 };
 
-const defaultCode = "# Write your code here...";
+const ALL_LANGUAGES: Language[] = ["python", "javascript"];
+const fallbackCode = "# Write your solution here ...";
 
-const createDefaultTestCases = (): TestCase[] => [
-  { id: 1, input: "1 2 3", expected: "6", actual: "", passed: null },
-  { id: 2, input: "4 5 6", expected: "15", actual: "", passed: null },
-];
+const getProblemById = (id: string) => problems.find((p) => p.id === id) ?? defaultProblem;
+
+const getStarterCode = (problem: Problem, language: Language) =>
+  problem.starterCode[language] ?? fallbackCode;
+
+const buildDefaultTestCases = (problem: Problem): TestCase[] => {
+  if (!problem.sampleTests || problem.sampleTests.length === 0) {
+    return [
+      { id: 1, label: "Sample 1", input: "", expected: "", actual: "", passed: null },
+    ];
+  }
+
+  return problem.sampleTests.map((test, index) => ({
+    id: Number(`${problem.id}${index + 1}`) || Date.now() + index,
+    label: test.label ?? `Test ${index + 1}`,
+    input: test.input,
+    expected: test.expected,
+    actual: "",
+    passed: null,
+    hidden: test.hidden ?? false,
+  }));
+};
 
 const createDefaultChat = (): Message[] => [
   {
@@ -45,16 +66,69 @@ const createDefaultValidation = (): ValidationResult => ({
   passedCount: 0,
 });
 
-const createDefaultSession = (): SessionSlice => ({
-  code: defaultCode,
-  testCases: createDefaultTestCases(),
-  selectedTestIndex: 0,
-  chatMessages: createDefaultChat(),
-  validation: createDefaultValidation(),
-});
+const createDefaultSession = (problem: Problem): SessionSlice => {
+  const defaultLanguage = problem.defaultLanguage ?? "python";
+  const starterMap: SessionSlice["codeByLanguage"] = {};
+  ALL_LANGUAGES.forEach((lang) => {
+    if (problem.starterCode[lang]) {
+      starterMap[lang] = problem.starterCode[lang]!;
+    }
+  });
 
-const normalizeTestCases = (cases?: TestCase[]): TestCase[] =>
-  cases && cases.length > 0 ? cases : createDefaultTestCases();
+  return {
+    language: defaultLanguage,
+    codeByLanguage: starterMap,
+    testCases: buildDefaultTestCases(problem),
+    selectedTestIndex: 0,
+    chatMessages: createDefaultChat(),
+    validation: createDefaultValidation(),
+  };
+};
+
+const normalizeTestCases = (cases: TestCase[] | undefined, problem: Problem): TestCase[] => {
+  if (cases && cases.length > 0) return cases;
+  return buildDefaultTestCases(problem);
+};
+
+const mergeCodeMaps = (
+  stored: Partial<Record<Language, string>> | undefined,
+  problem: Problem
+): Partial<Record<Language, string>> => {
+  const merged: Partial<Record<Language, string>> = {};
+  ALL_LANGUAGES.forEach((lang) => {
+    const starter = problem.starterCode[lang];
+    if (starter) merged[lang] = starter;
+  });
+  if (stored) {
+    Object.entries(stored).forEach(([lang, value]) => {
+      if (value) merged[lang as Language] = value;
+    });
+  }
+  return merged;
+};
+
+const hydrateSession = (session: SessionSlice | undefined, problem: Problem): SessionSlice => {
+  const base = createDefaultSession(problem);
+  if (!session) return base;
+
+  const codeByLanguage = mergeCodeMaps(session.codeByLanguage, problem);
+  const legacyCode = (session as unknown as { code?: string }).code;
+  const legacyLanguage = (session as unknown as { language?: Language }).language ?? base.language;
+  if (legacyCode) {
+    codeByLanguage[legacyLanguage] = legacyCode;
+  }
+
+  const testCases = normalizeTestCases(session.testCases, problem);
+
+  return {
+    language: session.language ?? base.language,
+    codeByLanguage,
+    testCases,
+    selectedTestIndex: clampIndex(session.selectedTestIndex ?? 0, testCases.length),
+    chatMessages: session.chatMessages ?? createDefaultChat(),
+    validation: normalizeValidation(session.validation),
+  };
+};
 
 const normalizeValidation = (validation?: ValidationResult): ValidationResult =>
   validation ?? createDefaultValidation();
@@ -76,34 +150,45 @@ export function useInterviewSession() {
 export const InterviewSessionProvider = ({ children }: { children: React.ReactNode }) => {
   const persisted = readPersistedData();
   const initialProblemId = persisted?.currentProblemId ?? defaultProblem.id;
+  const initialProblem = getProblemById(initialProblemId);
+  const initialSession = hydrateSession(persisted?.sessions?.[initialProblemId], initialProblem);
+
   const [currentProblemId, setCurrentProblemId] = useState(initialProblemId);
-  const problem = problems.find((p) => p.id === currentProblemId) ?? defaultProblem;
+  const problem = getProblemById(currentProblemId);
 
-  const defaultSession = createDefaultSession();
-  const initialSession = persisted?.sessions?.[initialProblemId] ?? defaultSession;
-  const hydratedTestCases = normalizeTestCases(initialSession.testCases);
+  const [language, setLanguageState] = useState<Language>(initialSession.language);
+  const [codeByLanguage, setCodeByLanguage] = useState(initialSession.codeByLanguage);
+  const [testCases, setTestCases] = useState<TestCase[]>(initialSession.testCases);
+  const [selectedTestIndex, setSelectedTestIndex] = useState(initialSession.selectedTestIndex);
+  const [chatMessages, setChatMessages] = useState<Message[]>(initialSession.chatMessages);
+  const [validationResult, setValidationResult] = useState<ValidationResult>(initialSession.validation);
 
-  const [code, setCode] = useState(initialSession.code ?? defaultCode);
-  const [testCases, setTestCases] = useState<TestCase[]>(hydratedTestCases);
-  const [selectedTestIndex, setSelectedTestIndex] = useState(
-    clampIndex(initialSession.selectedTestIndex ?? 0, hydratedTestCases.length)
-  );
-  const [chatMessages, setChatMessages] = useState<Message[]>(initialSession.chatMessages ?? createDefaultChat());
-  const [validationResult, setValidationResult] = useState<ValidationResult>(
-    normalizeValidation(initialSession.validation)
-  );
+  const code = codeByLanguage[language] ?? getStarterCode(problem, language);
+  const setCode = (value: string) => {
+    setCodeByLanguage((prev) => ({
+      ...prev,
+      [language]: value,
+    }));
+  };
 
   const selectProblem = (problemId: string) => {
     if (problemId === currentProblemId) return;
-    setCurrentProblemId(problemId);
+    const nextProblem = getProblemById(problemId);
     const stored = readPersistedData();
-    const session = stored?.sessions?.[problemId] ?? createDefaultSession();
-    const normalizedCases = normalizeTestCases(session.testCases);
-    setCode(session.code ?? defaultCode);
-    setTestCases(normalizedCases);
-    setSelectedTestIndex(clampIndex(session.selectedTestIndex ?? 0, normalizedCases.length));
-    setChatMessages(session.chatMessages ?? createDefaultChat());
-    setValidationResult(normalizeValidation(session.validation));
+    const session = hydrateSession(stored?.sessions?.[problemId], nextProblem);
+
+    setCurrentProblemId(problemId);
+    setLanguageState(session.language);
+    setCodeByLanguage(session.codeByLanguage);
+    setTestCases(session.testCases);
+    setSelectedTestIndex(session.selectedTestIndex);
+    setChatMessages(session.chatMessages);
+    setValidationResult(session.validation);
+  };
+
+  const setLanguage = (nextLanguage: Language) => {
+    if (nextLanguage === language) return;
+    setLanguageState(nextLanguage);
   };
 
   const invalidateValidation = () => {
@@ -115,13 +200,25 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    setCodeByLanguage((prev) => {
+      if (prev[language]) return prev;
+      return {
+        ...prev,
+        [language]: getStarterCode(problem, language),
+      };
+    });
+  }, [language, problem]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const existing = readPersistedData() ?? { currentProblemId: currentProblemId, sessions: {} };
     const nextData: PersistedData = {
       currentProblemId: currentProblemId,
       sessions: {
         ...existing.sessions,
         [currentProblemId]: {
-          code,
+          language,
+          codeByLanguage,
           testCases,
           selectedTestIndex,
           chatMessages,
@@ -130,7 +227,15 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
       },
     };
     writePersistedData(nextData);
-  }, [currentProblemId, code, testCases, selectedTestIndex, chatMessages, validationResult]);
+  }, [
+    currentProblemId,
+    language,
+    codeByLanguage,
+    testCases,
+    selectedTestIndex,
+    chatMessages,
+    validationResult,
+  ]);
 
   return (
     <InterviewSessionContext.Provider
@@ -140,6 +245,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
         problem,
         availableProblems: problems,
         selectProblem,
+        language,
+        setLanguage,
         testCases,
         setTestCases,
         selectedTestIndex,

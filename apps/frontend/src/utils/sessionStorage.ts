@@ -1,9 +1,10 @@
-import type { Message, TestCase, ValidationResult } from "./types";
+import type { Language, Message, TestCase, ValidationResult } from "./types";
 
 export const SESSION_STORAGE_KEY = "ai-coding-interviewer::session";
 
 export type SessionSlice = {
-  code: string;
+  language: Language;
+  codeByLanguage: Partial<Record<Language, string>>;
   testCases: TestCase[];
   selectedTestIndex: number;
   chatMessages: Message[];
