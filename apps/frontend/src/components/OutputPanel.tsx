@@ -6,12 +6,15 @@ export default function OutputPanel() {
     setTestCases,
     selectedTestIndex,
     setSelectedTestIndex,
+    validationResult,
+    invalidateValidation,
   } = useInterviewSession();
 
   const selected = testCases[selectedTestIndex];
 
   // Add a test case
   const addTestCase = () => {
+    invalidateValidation();
     setTestCases((prev) => [
       ...prev,
       {
@@ -28,6 +31,7 @@ export default function OutputPanel() {
   // Delete a test case
   const deleteTestCase = (id: number, idx: number) => {
     if (testCases.length === 1) return; // Prevent deleting the last case
+    invalidateValidation();
     const newCases = testCases.filter((t) => t.id !== id);
     setTestCases(newCases);
     // If you delete the current tab, select the previous one (or the next if deleting first)
@@ -40,11 +44,25 @@ export default function OutputPanel() {
 
   // Edit input/expected output fields
   const updateSelectedTest = (field: "input" | "expected", value: string) => {
+    invalidateValidation();
     setTestCases((prev) =>
       prev.map((t, i) =>
         i === selectedTestIndex ? { ...t, [field]: value } : t
       )
     );
+  };
+
+  const formatValidationSummary = () => {
+    if (validationResult.status === "idle") {
+      return "Not validated yet";
+    }
+    const total = validationResult.totalCount ?? testCases.length;
+    const passed = validationResult.passedCount ?? 0;
+    const timestamp = validationResult.lastRunAt
+      ? new Date(validationResult.lastRunAt).toLocaleTimeString()
+      : null;
+    const base = `${passed}/${total} tests passed`;
+    return timestamp ? `${base} • ${timestamp}` : base;
   };
 
   return (
@@ -82,6 +100,20 @@ export default function OutputPanel() {
         >
           + Add
         </button>
+      </div>
+      <div className="flex items-center justify-between text-xs text-app-muted mb-2">
+        <span className="uppercase tracking-wide">Validation</span>
+        <span
+          className={
+            validationResult.status === "passed"
+              ? "text-green-300"
+              : validationResult.status === "failed"
+              ? "text-red-300"
+              : "text-app-muted"
+          }
+        >
+          {formatValidationSummary()}
+        </span>
       </div>
 
       {/* Output area */}

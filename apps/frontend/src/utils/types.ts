@@ -23,6 +23,15 @@ export type TestCase = {
   passed: boolean | null;
 };
 
+export type ValidationResultStatus = "idle" | "passed" | "failed";
+
+export type ValidationResult = {
+  status: ValidationResultStatus;
+  lastRunAt?: number;
+  totalCount?: number;
+  passedCount?: number;
+};
+
 export type Message = {
   sender: "user" | "agent";
   text: string;

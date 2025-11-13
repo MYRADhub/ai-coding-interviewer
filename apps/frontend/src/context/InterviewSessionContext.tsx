@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import type { Problem, TestCase, Message } from "../utils/types";
+import type { Problem, TestCase, Message, ValidationResult } from "../utils/types";
 import { problems, defaultProblem } from "../data/problems";
+import {
+  readPersistedData,
+  writePersistedData,
+  type SessionSlice,
+  type PersistedData,
+} from "../utils/sessionStorage";
 
 type InterviewSessionContextType = {
   code: string;
@@ -14,20 +20,9 @@ type InterviewSessionContextType = {
   setSelectedTestIndex: React.Dispatch<React.SetStateAction<number>>;
   chatMessages: Message[];
   setChatMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-};
-
-const STORAGE_KEY = "ai-coding-interviewer::session";
-
-type SessionSlice = {
-  code: string;
-  testCases: TestCase[];
-  selectedTestIndex: number;
-  chatMessages: Message[];
-};
-
-type PersistedData = {
-  currentProblemId: string;
-  sessions: Record<string, SessionSlice>;
+  validationResult: ValidationResult;
+  setValidationResult: React.Dispatch<React.SetStateAction<ValidationResult>>;
+  invalidateValidation: () => void;
 };
 
 const defaultCode = "# Write your code here...";
@@ -44,32 +39,29 @@ const createDefaultChat = (): Message[] => [
   },
 ];
 
+const createDefaultValidation = (): ValidationResult => ({
+  status: "idle",
+  totalCount: 0,
+  passedCount: 0,
+});
+
 const createDefaultSession = (): SessionSlice => ({
   code: defaultCode,
   testCases: createDefaultTestCases(),
   selectedTestIndex: 0,
   chatMessages: createDefaultChat(),
+  validation: createDefaultValidation(),
 });
 
 const normalizeTestCases = (cases?: TestCase[]): TestCase[] =>
   cases && cases.length > 0 ? cases : createDefaultTestCases();
 
+const normalizeValidation = (validation?: ValidationResult): ValidationResult =>
+  validation ?? createDefaultValidation();
+
 const clampIndex = (index: number, length: number) => {
   if (!Number.isFinite(index) || length <= 0) return 0;
   return Math.min(Math.max(index, 0), length - 1);
-};
-
-const readPersistedData = (): PersistedData | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return null;
-    return parsed as PersistedData;
-  } catch {
-    return null;
-  }
 };
 
 const InterviewSessionContext = createContext<InterviewSessionContextType | undefined>(undefined);
@@ -97,6 +89,9 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     clampIndex(initialSession.selectedTestIndex ?? 0, hydratedTestCases.length)
   );
   const [chatMessages, setChatMessages] = useState<Message[]>(initialSession.chatMessages ?? createDefaultChat());
+  const [validationResult, setValidationResult] = useState<ValidationResult>(
+    normalizeValidation(initialSession.validation)
+  );
 
   const selectProblem = (problemId: string) => {
     if (problemId === currentProblemId) return;
@@ -108,6 +103,14 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     setTestCases(normalizedCases);
     setSelectedTestIndex(clampIndex(session.selectedTestIndex ?? 0, normalizedCases.length));
     setChatMessages(session.chatMessages ?? createDefaultChat());
+    setValidationResult(normalizeValidation(session.validation));
+  };
+
+  const invalidateValidation = () => {
+    setValidationResult((prev) => {
+      if (prev.status === "idle") return prev;
+      return { status: "idle" };
+    });
   };
 
   useEffect(() => {
@@ -122,11 +125,12 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
           testCases,
           selectedTestIndex,
           chatMessages,
+          validation: validationResult,
         },
       },
     };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-  }, [currentProblemId, code, testCases, selectedTestIndex, chatMessages]);
+    writePersistedData(nextData);
+  }, [currentProblemId, code, testCases, selectedTestIndex, chatMessages, validationResult]);
 
   return (
     <InterviewSessionContext.Provider
@@ -142,6 +146,9 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
         setSelectedTestIndex,
         chatMessages,
         setChatMessages,
+        validationResult,
+        setValidationResult,
+        invalidateValidation,
       }}
     >
       {children}

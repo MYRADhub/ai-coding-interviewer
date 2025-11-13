@@ -13,6 +13,7 @@ export default function ChatPanel() {
     testCases,
     chatMessages,
     setChatMessages,
+    validationResult,
   } = useInterviewSession();
 
   const [input, setInput] = useState("");
@@ -41,6 +42,7 @@ export default function ChatPanel() {
         problem,
         code,
         testCases,
+        validationResult,
         messages: updatedMessages.map(msg => ({
           sender: msg.sender === "agent" ? "ai" : "user",
           text: msg.text,

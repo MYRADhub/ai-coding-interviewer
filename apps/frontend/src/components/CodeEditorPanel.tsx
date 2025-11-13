@@ -9,6 +9,9 @@ export default function CodeEditorPanel() {
     setCode,
     testCases,
     setTestCases,
+    problem,
+    setValidationResult,
+    invalidateValidation,
   } = useInterviewSession();
 
   const [language, setLanguage] = useState("python");
@@ -17,34 +20,96 @@ export default function CodeEditorPanel() {
   const runCode = async () => {
     setLoading(true);
 
-    // Run each test case and update results
-    const results = await Promise.all(
-      testCases.map(async (test) => {
-        try {
-          const response = await fetch("http://localhost:3001/api/run", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              language,
-              code,
-              input: test.input,
-            }),
-          });
-          const data = await response.json();
-          const actual = (data.output ?? "").replace(/\r/g, "").trim();
-          const expected = (test.expected ?? "").replace(/\r/g, "").trim();
-          const passed = actual === expected;
-          return { ...test, actual, passed };
-        } catch {
-          return { ...test, actual: "❌ Error running code", passed: false };
-        }
-      })
-    );
+    try {
+      const response = await fetch("http://localhost:3001/api/run-tests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language,
+          code,
+          problemId: problem.id,
+          tests: testCases.map((test) => ({
+            id: test.id,
+            input: test.input,
+            expected: test.expected,
+          })),
+        }),
+      });
 
-    setTestCases(results);
-    setLoading(false);
+      if (!response.ok) {
+        throw new Error("Runner returned an error");
+      }
+
+      type RemoteResult = {
+        id: number;
+        actual?: string;
+        passed?: boolean;
+      };
+      type RemoteSummary = {
+        status?: string;
+        passedCount?: number;
+        totalCount?: number;
+        lastRunAt?: number;
+      };
+
+      const data = await response.json();
+      const remoteResults: RemoteResult[] = Array.isArray(data.results) ? data.results : [];
+      const resultsById = new Map(remoteResults.map((result) => [result.id, result]));
+
+      const updatedTests = testCases.map((test) => {
+        const remote = resultsById.get(test.id);
+        if (!remote) return test;
+        return {
+          ...test,
+          actual: remote.actual ?? "",
+          passed: remote.passed ?? false,
+        };
+      });
+
+      setTestCases(updatedTests);
+
+      const summary: RemoteSummary = data.summary ?? {};
+      const passedCount =
+        typeof summary.passedCount === "number"
+          ? summary.passedCount
+          : updatedTests.filter((test) => test.passed).length;
+      const totalCount =
+        typeof summary.totalCount === "number" ? summary.totalCount : updatedTests.length;
+      const status =
+        summary.status === "passed" || summary.status === "failed"
+          ? summary.status
+          : totalCount === 0
+          ? "idle"
+          : passedCount === totalCount
+          ? "passed"
+          : "failed";
+
+      setValidationResult({
+        status,
+        lastRunAt: summary.lastRunAt ?? Date.now(),
+        totalCount,
+        passedCount,
+      });
+    } catch (err) {
+      console.error("Failed to run tests:", err);
+      setTestCases((prev) =>
+        prev.map((test) => ({
+          ...test,
+          actual: "❌ Error contacting runner",
+          passed: false,
+        }))
+      );
+      setValidationResult({
+        status: testCases.length === 0 ? "idle" : "failed",
+        lastRunAt: Date.now(),
+        totalCount: testCases.length,
+        passedCount: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,7 +128,10 @@ export default function CodeEditorPanel() {
       </div>
       <CodeEditor
         value={code}
-        onChange={(value) => setCode(value ?? "")}
+        onChange={(value) => {
+          invalidateValidation();
+          setCode(value ?? "");
+        }}
       />
       {loading && (
         <div className="text-app-muted text-xs mt-2 text-center">Running all test cases...</div>
