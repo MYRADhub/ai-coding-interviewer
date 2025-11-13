@@ -260,6 +260,10 @@ export const problems: Problem[] = [
 - Prefer O(n) solutions using auxiliary space rather than O(n²) brute force.
 `,
       constraints: ["2 ≤ nums.length ≤ 10⁴", "-10⁹ ≤ nums[i], target ≤ 10⁹"],
+      hints: [
+        "Use a hash map from value -> index while iterating.",
+        "As you scan, check if target - nums[i] exists in the map.",
+      ],
       followUps: ["What changes if multiple answers can exist?", "Can you solve it in-place?"],
     },
   },
@@ -290,7 +294,14 @@ export const problems: Problem[] = [
 - When you encounter a duplicate, shrink the window from the left.
 `,
       constraints: ["1 ≤ |s| ≤ 5 * 10⁴", "s consists of ASCII characters."],
-      hints: ["Maintain a dictionary mapping character -> last seen index."],
+      hints: [
+        "Maintain a dictionary mapping character -> last seen index.",
+        "Track the current window start; jump it past duplicates instead of removing one char at a time.",
+      ],
+      followUps: [
+        "How would this change if we needed the substring itself, not just its length?",
+        "Can you support Unicode grapheme clusters efficiently?",
+      ],
     },
   },
   {
@@ -320,6 +331,14 @@ export const problems: Problem[] = [
 - Pop only if the current closing bracket matches the stack top.
 `,
       constraints: ["1 ≤ |s| ≤ 10⁴"],
+      hints: [
+        "Map each closing bracket to its matching opening bracket.",
+        "Early exit when the stack is empty but a closing bracket appears.",
+      ],
+      followUps: [
+        "How would you validate HTML/XML-like tags where tokens can be multi-character?",
+        "Can you extend this to handle wildcard characters such as '*'?",
+      ],
     },
   },
   {
@@ -360,6 +379,11 @@ export const problems: Problem[] = [
 1. Sort intervals by starting coordinate.
 2. Iterate and merge when the current start is ≤ previous end.
 `,
+      constraints: ["1 ≤ intervals.length ≤ 10⁴", "-10⁵ ≤ startᵢ ≤ endᵢ ≤ 10⁵"],
+      hints: [
+        "Sorting by the first element lets you scan once while merging.",
+        "Keep a result list and compare against the last merged interval.",
+      ],
       followUps: ["How would you merge in-place with O(1) extra space?"],
     },
   },
@@ -394,6 +418,14 @@ export const problems: Problem[] = [
 - Remember to separate each level's nodes before continuing.
 `,
       constraints: ["0 ≤ nodes ≤ 10⁴"],
+      hints: [
+        "Use a queue and process nodes level by level, capturing the queue size before each round.",
+        "Alternatively, use DFS with depth tracking to append values into level-indexed arrays.",
+      ],
+      followUps: [
+        "How would you return a zig-zag (alternating direction) traversal?",
+        "Can you compute averages per level instead of raw values?",
+      ],
     },
   },
 ];
