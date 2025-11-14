@@ -6,7 +6,6 @@
   --bg-light: #f0f2f5;
   --text: #1f2329;
   --text-muted: #5f6c7b;
-  --highlight: #ffb800;
   --border: #e4e7ed;
   --border-muted: #d6dae2;
   --primary: #ffa116;
@@ -15,6 +14,22 @@
   --warning: #f4c150;
   --success: #2db55d;
   --info: #409eff;
+}
+
+body[data-theme="dark"] {
+  --bg: #0f1115;
+  --bg-dark: #181a1f;
+  --bg-light: #1f2228;
+  --text: #f5f6f9;
+  --text-muted: #9ea7b3;
+  --border: #2a2e36;
+  --border-muted: #3a3f4a;
+  --primary: #ffa116;
+  --secondary: #43d27c;
+  --danger: #f67260;
+  --warning: #f4c150;
+  --success: #34c27a;
+  --info: #4f9eff;
 }
 
 @layer utilities {
