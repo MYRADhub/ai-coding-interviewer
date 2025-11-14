@@ -92,17 +92,23 @@ export default function CodingInterviewLayout() {
       <div className="flex h-full w-full px-3 py-2 gap-2">
         <div
           ref={leftPaneRef}
-          className="flex flex-col space-y-2 pr-2"
+          className="flex flex-col gap-2 pr-2 h-full"
           style={{ width: `${leftWidth}%` }}
         >
-          <div className="flex-1 min-h-0" style={{ height: `${topHeight}%` }}>
+          <div
+            className="flex-none min-h-[160px]"
+            style={{ flexBasis: `${topHeight}%` }}
+          >
             <ProblemPanel />
           </div>
           <div
             className="h-1 cursor-row-resize rounded bg-[var(--border)] hover:bg-[color-mix(in_srgb,var(--border),#000_10%)] transition"
             onMouseDown={() => startDrag("horizontal")}
           />
-          <div className="flex-1 min-h-0">
+          <div
+            className="flex-1 min-h-0"
+            style={{ flexBasis: `${100 - topHeight}%`, minHeight: MIN_BOTTOM_HEIGHT }}
+          >
             <ChatPanel />
           </div>
         </div>
