@@ -114,8 +114,8 @@ export default function CodeEditorPanel() {
   };
 
   return (
-    <div className="border border-app bg-app-dark rounded p-2 flex flex-col">
-      <div className="flex justify-between mb-2">
+    <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full">
+      <div className="flex justify-between mb-2 gap-3">
         <RunButton onClick={runCode} disabled={loading} />
         <select
           value={language}

@@ -77,23 +77,24 @@ export default function ChatPanel() {
       {/* Chat bubbles */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-2 pr-1"
+        className="flex-1 overflow-y-auto space-y-2 pr-1 flex flex-col"
       >
         {chatMessages.map((msg, i) => (
-          <div
-            key={i}
-            className={`max-w-[80%] px-3 py-2 rounded text-sm ${
-              msg.sender === "user"
-                ? "bg-[var(--primary)] text-black self-end"
-                : "bg-app-light text-app self-start"
-            }`}
-          >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              className="space-y-1 leading-relaxed text-sm markdown-body"
+          <div key={i} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`max-w-[80%] px-3 py-2 rounded text-sm shadow-sm border ${
+                msg.sender === "user"
+                  ? "bg-[var(--primary)] text-black border-transparent"
+                  : "bg-app-light text-app border-app"
+              }`}
             >
-              {msg.text}
-            </ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="space-y-1 leading-relaxed text-sm markdown-body"
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </div>
           </div>
         ))}
         {loading && (

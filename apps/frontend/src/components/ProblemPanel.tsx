@@ -29,7 +29,7 @@ export default function ProblemPanel() {
   };
 
   return (
-    <div className="border border-app bg-app-dark rounded p-4 overflow-y-auto">
+    <div className="border border-app bg-app-dark rounded p-4 overflow-y-auto h-full">
       <div className="flex flex-col gap-2 mb-3">
         <label className="text-xs uppercase tracking-wide text-app-muted">Problem</label>
         <select
