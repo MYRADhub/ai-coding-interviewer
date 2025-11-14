@@ -74,7 +74,7 @@ export default function OutputPanel() {
   };
 
   return (
-    <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full">
+    <div className="border border-app bg-app-dark rounded-lg p-3 flex flex-col h-full shadow-sm">
       {/* Tab list */}
       <div className="flex gap-2 mb-2 overflow-x-auto">
         {testCases.map((test, i) => (

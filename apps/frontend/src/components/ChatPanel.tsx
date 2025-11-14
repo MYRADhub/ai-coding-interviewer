@@ -73,7 +73,7 @@ export default function ChatPanel() {
   };
 
   return (
-    <div className="border border-app bg-app-dark rounded p-2 flex flex-col h-full">
+    <div className="border border-app bg-app-dark rounded-lg p-3 flex flex-col h-full shadow-sm">
       {/* Chat bubbles */}
       <div
         ref={scrollRef}
