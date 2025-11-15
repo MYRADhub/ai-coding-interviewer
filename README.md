@@ -8,27 +8,31 @@ Users can solve coding challenges in a realistic coding environment, chat with a
 ## 🚀 Features
 
 - **AI Interview Mode**  
-  👨‍💻 Chat with an AI interviewer who adapts to your answers, asks follow-ups, and gives feedback.
+  👨‍💻 Chat with an AI interviewer who adapts to your answers, references the full problem brief (constraints, hints, follow-ups), and reasons over your latest test results.
 
-- **In-Browser Code Editor**  
-  ✍️ Powered by Monaco (same editor as VSCode).  
-  Supports Python and JavaScript with syntax highlighting, autocomplete, and more.
+- **Resizable LeetCode-style Workspace**  
+  🧩 Problem + chat stack on the left, full-height editor on the right, and a bottom drawer for test output. Vertical and horizontal splitters let you resize everything just like modern coding platforms.
+
+- **Dual Themes**  
+  🌗 Instantly switch between light and dark palettes (with proper markdown/code styling) via the navbar toggle.
 
 - **Language-Aware Starter Templates**  
   📄 Every problem ships with function signatures, docstrings, and IO scaffolding for Python & JavaScript so you can focus on the core algorithm.
 
-- **Custom Test Cases**  
-  🧪 Add and manage test cases just like in LeetCode/HackerRank.  
-  See pass/fail results in real-time.
+- **In-Browser Code Editor**  
+  ✍️ Powered by Monaco (VSCode engine) with syntax highlighting, autocomplete, and per-language persistence.
+
+- **Custom + Server Tests**  
+  🧪 Define your own tests, run them all at once via the backend runner, and view pass/fail history in an expandable results drawer. Validation state is stored per problem + language.
 
 - **Interactive Chat Panel**  
-  💬 Persistent conversation with AI. The interviewer now sees extended problem briefs, constraints, and your latest validation status—and renders markdown richly inside the chat bubble.
+  💬 Markdown-rendered conversation that stays in sync with your code, tests, and validation status, so the interviewer can offer relevant guidance.
 
 - **Progress Dashboard**  
-  📊 The home page summarizes which problems are solved/needs-work based on your last validation run, all stored locally per problem/language.
+  📊 The home page summarizes solved vs. needs-work problems using your latest validation data, all cached locally per session.
 
 - **Local Persistence**  
-  💾 Everything (code, test cases, chat) autosaves in `localStorage`. Refresh without losing progress.
+  💾 Code, test cases, chat transcripts, language choice, and validation status auto-save in `localStorage`, so nothing is lost on refresh.
 
 ---
 
@@ -52,15 +56,16 @@ Here’s how the coding interview environment looks right now:
 
 ---
 
-## 📅 Development Roadmap (MVP)
+## 📅 Roadmap
 
-- [x] Core layout with 4 panels (Problem, Code Editor, Output, Chat)
-- [x] Code execution backend (Python + JS)
-- [x] Custom test cases + run all at once
-- [x] AI interviewer chat integration (with context)
-- [x] Local persistence with `localStorage`
-- [ ] Session history & dashboard
-- [ ] AI-generated problems
+- [x] Multi-pane layout + resizable splitters
+- [x] Language-aware starter templates + per-problem persistence
+- [x] AI interviewer chat integration with validation context
+- [x] Test drawer + backend runner
+- [x] Light/Dark theme toggle
+- [ ] Interview agent persona (guided phases, hints, scoring)
+- [ ] Session history / “New Interview” flow
+- [ ] Hidden/official test suites
 - [ ] Deployment (Vercel + Railway/Fly.io)
 
 ---
