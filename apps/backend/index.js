@@ -66,6 +66,37 @@ app.post("/api/run", async (req, res) => {
   }
 });
 
+const officialSuites = {
+  "0001": [
+    { id: "official-1", input: '{"nums":[1,3,4,2], "target":6}', expected: "[1,3]" },
+    { id: "official-2", input: '{"nums":[-3,4,3,90], "target":0}', expected: "[0,2]" },
+  ],
+  "0002": [
+    { id: "official-1", input: '{"s":"dvdf"}', expected: "3" },
+    { id: "official-2", input: '{"s":"anviaj"}', expected: "5" },
+  ],
+  "0003": [
+    { id: "official-1", input: '{"s":"([]{})"}', expected: "true" },
+    { id: "official-2", input: '{"s":"([)]"}', expected: "false" },
+  ],
+  "0004": [
+    {
+      id: "official-1",
+      input: '{"intervals":[[1,5],[6,9],[2,4],[7,8]]}',
+      expected: "[[1,5],[6,9]]",
+    },
+    {
+      id: "official-2",
+      input: '{"intervals":[[1,4],[0,2],[3,5]]}',
+      expected: "[[0,5]]",
+    },
+  ],
+  "0005": [
+    { id: "official-1", input: '{"root":[1,2,3,4,5]}', expected: "[[1],[2,3],[4,5]]" },
+    { id: "official-2", input: '{"root":[1,null,2,null,3,null,4]}', expected: "[[1],[2],[3],[4]]" },
+  ],
+};
+
 app.post("/api/run-tests", async (req, res) => {
   const { language, code, tests = [], problemId } = req.body;
 
@@ -114,15 +145,56 @@ app.post("/api/run-tests", async (req, res) => {
     }
   }
 
+  const officialTests = officialSuites[problemId] || [];
+  const officialResults = [];
+  let officialPassed = 0;
+
+  for (const test of officialTests) {
+    const testId = test.id ?? crypto.randomUUID?.() ?? Date.now();
+    const input = test.input ?? "";
+    const expected = (test.expected ?? "").replace(/\r/g, "").trim();
+
+    try {
+      const { output, errorOutput } = await runUserCode(language, code, input);
+      const runtimeError = errorOutput?.trim() || null;
+      const normalizedOutput = (output ?? "").replace(/\r/g, "").trim();
+      const actual = runtimeError || normalizedOutput;
+      const passed = !runtimeError && normalizedOutput === expected;
+      if (passed) officialPassed += 1;
+      officialResults.push({
+        id: testId,
+        input,
+        expected,
+        actual,
+        passed,
+        hidden: true,
+        error: runtimeError,
+      });
+    } catch (err) {
+      officialResults.push({
+        id: testId,
+        input,
+        expected,
+        actual: err.message || "Failed to execute code",
+        passed: false,
+        hidden: true,
+        error: err.message || "Failed to execute code",
+      });
+    }
+  }
+
   const summary = {
     problemId,
     totalCount: tests.length,
     passedCount,
-    status: passedCount === tests.length ? "passed" : "failed",
+    officialTotal: officialTests.length,
+    officialPassed,
+    status:
+      passedCount === tests.length && officialPassed === officialTests.length ? "passed" : "failed",
     lastRunAt: Date.now(),
   };
 
-  return res.json({ results, summary });
+  return res.json({ results, officialResults, summary });
 });
 
 const { OpenAI } = require("openai");

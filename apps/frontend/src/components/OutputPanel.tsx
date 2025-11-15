@@ -66,10 +66,15 @@ export default function OutputPanel() {
     }
     const total = validationResult.totalCount ?? testCases.length;
     const passed = validationResult.passedCount ?? 0;
+    const officialTotal = validationResult.officialTotal ?? 0;
+    const officialPassed = validationResult.officialPassed ?? 0;
     const timestamp = validationResult.lastRunAt
       ? new Date(validationResult.lastRunAt).toLocaleTimeString()
       : null;
-    const base = `${passed}/${total} tests passed`;
+    let base = `${passed}/${total} custom tests passed`;
+    if (officialTotal > 0) {
+      base += ` • ${officialPassed}/${officialTotal} official tests`;
+    }
     return timestamp ? `${base} • ${timestamp}` : base;
   };
 
@@ -112,17 +117,19 @@ export default function OutputPanel() {
       </div>
       <div className="flex items-center justify-between text-xs text-app-muted mb-2">
         <span className="uppercase tracking-wide">Validation</span>
-        <span
-          className={
-            validationResult.status === "passed"
-              ? "text-green-300"
-              : validationResult.status === "failed"
-              ? "text-red-300"
-              : "text-app-muted"
-          }
-        >
-          {formatValidationSummary()}
-        </span>
+        <div className="flex flex-col text-right">
+          <span
+            className={
+              validationResult.status === "passed"
+                ? "text-green-300"
+                : validationResult.status === "failed"
+                ? "text-red-300"
+                : "text-app-muted"
+            }
+          >
+            {formatValidationSummary()}
+          </span>
+        </div>
       </div>
 
       {/* Output area */}

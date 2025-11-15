@@ -55,6 +55,8 @@ export default function CodeEditorPanel() {
         passedCount?: number;
         totalCount?: number;
         lastRunAt?: number;
+        officialPassed?: number;
+        officialTotal?: number;
       };
 
       const data = await response.json();
@@ -80,8 +82,12 @@ export default function CodeEditorPanel() {
           : updatedTests.filter((test) => test.passed).length;
       const totalCount =
         typeof summary.totalCount === "number" ? summary.totalCount : updatedTests.length;
+      const officialPassed = summary.officialPassed ?? 0;
+      const officialTotal = summary.officialTotal ?? 0;
       const status =
-        summary.status === "passed" || summary.status === "failed"
+        officialTotal > 0 && officialPassed !== officialTotal
+          ? "failed"
+          : summary.status === "passed" || summary.status === "failed"
           ? summary.status
           : totalCount === 0
           ? "idle"
@@ -94,6 +100,8 @@ export default function CodeEditorPanel() {
         lastRunAt: summary.lastRunAt ?? Date.now(),
         totalCount,
         passedCount,
+        officialPassed,
+        officialTotal,
       });
       if (status === "passed") {
         setInterviewStage("wrap_up");

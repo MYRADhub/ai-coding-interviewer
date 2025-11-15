@@ -57,6 +57,8 @@ export type ValidationResult = {
   lastRunAt?: number;
   totalCount?: number;
   passedCount?: number;
+  officialTotal?: number;
+  officialPassed?: number;
 };
 
 export type Message = {

@@ -22,8 +22,8 @@ Users can solve coding challenges in a realistic coding environment, chat with a
 - **In-Browser Code Editor**  
   ✍️ Powered by Monaco (VSCode engine) with syntax highlighting, autocomplete, and per-language persistence.
 
-- **Custom + Server Tests**  
-  🧪 Define your own tests, run them all at once via the backend runner, and view pass/fail history in an expandable results drawer. Validation state is stored per problem + language.
+- **Custom + Official Test Suites**  
+  🧪 Define your own tests, run them all at once via the backend runner, and see a clear breakdown of user vs. official hidden tests in the results drawer. Validation state is stored per problem + language.
 
 - **Interactive Chat Panel**  
   💬 Markdown-rendered conversation that stays in sync with your code, tests, and validation status, so the interviewer can offer relevant guidance.
@@ -68,7 +68,7 @@ Here’s how the coding interview environment looks right now:
 - [x] Light/Dark theme toggle
 - [x] Interview agent persona (guided phases, hints, scoring)
 - [x] Session history / “New Interview” flow
-- [ ] Hidden/official test suites
+- [x] Hidden/official test suites
 - [ ] Deployment (Vercel + Railway/Fly.io)
 
 ---
