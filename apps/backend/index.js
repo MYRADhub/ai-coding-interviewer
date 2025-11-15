@@ -131,7 +131,7 @@ require("dotenv").config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.post("/api/chat", async (req, res) => {
-  const { messages, problem, code, validationResult, language } = req.body;
+  const { messages, problem, code, validationResult, language, interviewStage } = req.body;
 
   if (!messages || !problem || !code) {
     return res.status(400).json({ error: "Missing messages, problem, or code" });
@@ -156,6 +156,19 @@ app.post("/api/chat", async (req, res) => {
           : ""
       }.`
     : "Tests have not been run yet.";
+
+  const stageGuidance = {
+    introduction:
+      "Set expectations, briefly introduce yourself, and ask the candidate to restate the problem or clarify requirements. Keep the tone welcoming.",
+    clarification:
+      "Ask high-leverage questions about edge cases, constraints, and approach tradeoffs. Encourage the candidate to think out loud and guide them lightly.",
+    guidance:
+      "Review their latest code/tests, highlight issues, and offer targeted hints rather than full solutions. Suggest improvements or missing scenarios.",
+    wrap_up:
+      "Assume the candidate is nearing completion. Provide a concise assessment: mention complexity, readability, and remaining risks. Celebrate success if tests pass; otherwise outline next steps. Include actionable bullet feedback.",
+  };
+
+  const stagePrompt = stageGuidance[interviewStage] || stageGuidance.introduction;
 
   const systemPrompt = `
 You are a technical interviewer for a software engineering position.
@@ -187,6 +200,9 @@ ${code || "[no code submitted yet]"}
 ---
 
 ${validationSummary}
+
+Interview phase: ${interviewStage || "introduction"}
+Guidance: ${stagePrompt}
 
 Here is the chat history:
 ${messages.map(m => `[${m.sender}]: ${m.text}`).join('\n')}

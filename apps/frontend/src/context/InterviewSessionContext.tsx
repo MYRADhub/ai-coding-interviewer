@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import type { Problem, TestCase, Message, ValidationResult, Language } from "../utils/types";
+import type {
+  Problem,
+  TestCase,
+  Message,
+  ValidationResult,
+  Language,
+  InterviewStage,
+} from "../utils/types";
 import { problems, defaultProblem } from "../data/problems";
 import {
   readPersistedData,
@@ -16,6 +23,8 @@ type InterviewSessionContextType = {
   selectProblem: (problemId: string) => void;
   language: Language;
   setLanguage: (language: Language) => void;
+  interviewStage: InterviewStage;
+  setInterviewStage: (stage: InterviewStage) => void;
   testCases: TestCase[];
   setTestCases: React.Dispatch<React.SetStateAction<TestCase[]>>;
   selectedTestIndex: number;
@@ -82,6 +91,7 @@ const createDefaultSession = (problem: Problem): SessionSlice => {
     selectedTestIndex: 0,
     chatMessages: createDefaultChat(),
     validation: createDefaultValidation(),
+    stage: "introduction",
   };
 };
 
@@ -127,6 +137,7 @@ const hydrateSession = (session: SessionSlice | undefined, problem: Problem): Se
     selectedTestIndex: clampIndex(session.selectedTestIndex ?? 0, testCases.length),
     chatMessages: session.chatMessages ?? createDefaultChat(),
     validation: normalizeValidation(session.validation),
+    stage: session.stage ?? "introduction",
   };
 };
 
@@ -162,6 +173,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
   const [selectedTestIndex, setSelectedTestIndex] = useState(initialSession.selectedTestIndex);
   const [chatMessages, setChatMessages] = useState<Message[]>(initialSession.chatMessages);
   const [validationResult, setValidationResult] = useState<ValidationResult>(initialSession.validation);
+  const [interviewStage, setInterviewStage] = useState<InterviewStage>(initialSession.stage);
 
   const code = codeByLanguage[language] ?? getStarterCode(problem, language);
   const setCode = (value: string) => {
@@ -184,6 +196,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     setSelectedTestIndex(session.selectedTestIndex);
     setChatMessages(session.chatMessages);
     setValidationResult(session.validation);
+    setInterviewStage(session.stage);
   };
 
   const setLanguage = (nextLanguage: Language) => {
@@ -223,6 +236,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
           selectedTestIndex,
           chatMessages,
           validation: validationResult,
+          stage: interviewStage,
         },
       },
     };
@@ -235,6 +249,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     selectedTestIndex,
     chatMessages,
     validationResult,
+    interviewStage,
   ]);
 
   return (
@@ -247,6 +262,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
         selectProblem,
         language,
         setLanguage,
+        interviewStage,
+        setInterviewStage,
         testCases,
         setTestCases,
         selectedTestIndex,

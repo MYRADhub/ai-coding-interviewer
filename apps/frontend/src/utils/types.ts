@@ -63,3 +63,9 @@ export type Message = {
   sender: "user" | "agent";
   text: string;
 };
+
+export type InterviewStage =
+  | "introduction"
+  | "clarification"
+  | "guidance"
+  | "wrap_up";

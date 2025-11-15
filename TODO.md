@@ -4,10 +4,9 @@ Track ongoing work on the AI Coding Interviewer. Update this list as tasks progr
 
 ## High Priority
 
-- [ ] **Interview Agent Persona**
-  - Script conversation phases (intro, problem clarification, guidance, wrap-up).
-  - Have the AI proactively ask guiding/edge-case questions and adapt tone to validation results.
-  - Provide structured feedback (complexity, readability, edge cases) at submission time.
+- [x] **Interview Agent Persona**
+  - Script conversation phases (intro, clarification, guidance, wrap-up) and persist stage state.
+  - Prompt now nudges the AI to ask guiding questions, reference validation state, and produce structured wrap-up feedback once tests pass.
 
 - [ ] **Session Management**
   - Add “Start New Interview” flow with problem selection.

@@ -14,6 +14,8 @@ export default function CodeEditorPanel() {
     setLanguage,
     setValidationResult,
     invalidateValidation,
+    interviewStage,
+    setInterviewStage,
   } = useInterviewSession();
 
   const [loading, setLoading] = useState(false);
@@ -93,6 +95,11 @@ export default function CodeEditorPanel() {
         totalCount,
         passedCount,
       });
+      if (status === "passed") {
+        setInterviewStage("wrap_up");
+      } else if (status === "failed" && interviewStage !== "wrap_up") {
+        setInterviewStage("guidance");
+      }
     } catch (err) {
       console.error("Failed to run tests:", err);
       setTestCases((prev) =>
@@ -108,6 +115,9 @@ export default function CodeEditorPanel() {
         totalCount: testCases.length,
         passedCount: 0,
       });
+      if (testCases.length > 0 && interviewStage !== "wrap_up") {
+        setInterviewStage("guidance");
+      }
     } finally {
       setLoading(false);
     }

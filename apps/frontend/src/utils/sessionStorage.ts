@@ -1,4 +1,4 @@
-import type { Language, Message, TestCase, ValidationResult } from "./types";
+import type { InterviewStage, Language, Message, TestCase, ValidationResult } from "./types";
 
 export const SESSION_STORAGE_KEY = "ai-coding-interviewer::session";
 
@@ -9,6 +9,7 @@ export type SessionSlice = {
   selectedTestIndex: number;
   chatMessages: Message[];
   validation: ValidationResult;
+  stage: InterviewStage;
 };
 
 export type PersistedData = {
