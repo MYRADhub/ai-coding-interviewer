@@ -69,3 +69,13 @@ export type InterviewStage =
   | "clarification"
   | "guidance"
   | "wrap_up";
+
+export type SessionHistoryEntry = {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  language: Language;
+  startedAt: number;
+  completedAt: number;
+  status: ValidationResultStatus;
+};

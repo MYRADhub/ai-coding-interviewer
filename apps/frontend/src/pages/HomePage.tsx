@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { problems } from "../data/problems";
-import type { ValidationResultStatus } from "../utils/types";
+import type { ValidationResultStatus, SessionHistoryEntry } from "../utils/types";
 import { readPersistedData, SESSION_STORAGE_KEY } from "../utils/sessionStorage";
 
 type ProblemProgressMap = Record<string, ValidationResultStatus>;
@@ -10,6 +10,7 @@ type ProblemProgressMap = Record<string, ValidationResultStatus>;
 export default function HomePage() {
   const navigate = useNavigate();
   const [progress, setProgress] = useState<ProblemProgressMap>({});
+  const [history, setHistory] = useState<SessionHistoryEntry[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -18,6 +19,7 @@ export default function HomePage() {
       const data = readPersistedData();
       if (!data?.sessions) {
         setProgress({});
+        setHistory([]);
         return;
       }
       const map: ProblemProgressMap = {};
@@ -25,6 +27,7 @@ export default function HomePage() {
         map[problemId] = session.validation?.status ?? "idle";
       });
       setProgress(map);
+      setHistory(data.history ?? []);
     };
 
     loadProgress();
@@ -63,6 +66,7 @@ export default function HomePage() {
           </div>
 
           <ProblemProgressList progress={progress} />
+          <SessionHistoryList history={history} />
         </div>
       </div>
     </div>
@@ -144,4 +148,44 @@ function statusBadgeProps(status: ValidationResultStatus) {
     default:
       return { label: "Not started", className: "text-app-muted bg-app-light/40" };
   }
+}
+
+function SessionHistoryList({ history }: { history: SessionHistoryEntry[] }) {
+  const recent = history.slice(0, 6);
+
+  return (
+    <div className="bg-app-dark border border-app rounded-xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">Recent Sessions</h3>
+          <p className="text-sm text-muted">Last {recent.length || 0} interview attempts</p>
+        </div>
+      </div>
+      {recent.length === 0 ? (
+        <p className="text-sm text-muted">No sessions yet. Start a new interview to begin tracking.</p>
+      ) : (
+        <div className="space-y-3">
+          {recent.map((entry) => {
+            const badge = statusBadgeProps(entry.status);
+            return (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between border border-app rounded-lg px-4 py-3 bg-app text-sm"
+              >
+                <div>
+                  <div className="font-medium">{entry.problemTitle}</div>
+                  <div className="text-xs text-muted">
+                    {new Date(entry.completedAt).toLocaleString()} • {entry.language.toUpperCase()}
+                  </div>
+                </div>
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badge.className}`}>
+                  {badge.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }

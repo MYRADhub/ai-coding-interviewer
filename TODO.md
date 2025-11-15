@@ -8,10 +8,9 @@ Track ongoing work on the AI Coding Interviewer. Update this list as tasks progr
   - Script conversation phases (intro, clarification, guidance, wrap-up) and persist stage state.
   - Prompt now nudges the AI to ask guiding questions, reference validation state, and produce structured wrap-up feedback once tests pass.
 
-- [ ] **Session Management**
-  - Add “Start New Interview” flow with problem selection.
-  - Support clearing code/tests/chat or duplicating a previous session.
-  - Surface past attempts/history (timestamp, problem, validation status).
+- [x] **Session Management**
+  - Added in-app “New Interview” button that resets the workspace while archiving the previous attempt.
+  - Session history now records timestamps, language, and verdict and is displayed on the home dashboard.
 
 - [ ] **Hidden/Official Test Suites**
   - After local tests pass, run server-side suites and present verdicts or failing scenarios.

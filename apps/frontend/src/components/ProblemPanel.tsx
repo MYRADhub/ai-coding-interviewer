@@ -3,7 +3,13 @@ import remarkGfm from "remark-gfm";
 import { useInterviewSession } from "../context/InterviewSessionContext";
 
 export default function ProblemPanel() {
-  const { problem, availableProblems, selectProblem, validationResult } = useInterviewSession();
+  const {
+    problem,
+    availableProblems,
+    selectProblem,
+    validationResult,
+    startNewInterview,
+  } = useInterviewSession();
   const { id, title, description, examples, difficulty, topics, details } = problem;
   const renderStatus = () => {
     switch (validationResult.status) {
@@ -32,17 +38,26 @@ export default function ProblemPanel() {
     <div className="border border-app bg-app-dark rounded-lg p-4 overflow-y-auto h-full shadow-sm">
       <div className="flex flex-col gap-2 mb-3">
         <label className="text-xs uppercase tracking-wide text-app-muted">Problem</label>
-        <select
-          value={problem.id}
-          onChange={(e) => selectProblem(e.target.value)}
-          className="bg-app-light border border-app rounded px-2 py-1 text-sm text-app focus:outline-none"
-        >
-          {availableProblems.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.id}. {p.title}
-            </option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={problem.id}
+            onChange={(e) => selectProblem(e.target.value)}
+            className="flex-1 bg-app-light border border-app rounded px-2 py-1 text-sm text-app focus:outline-none"
+          >
+            {availableProblems.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.id}. {p.title}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={startNewInterview}
+            className="text-xs border border-app rounded px-3 py-1 text-app hover:bg-app-light transition"
+          >
+            New Interview
+          </button>
+        </div>
       </div>
       <h2 className="font-bold text-lg mb-1">
         {id}. {title}

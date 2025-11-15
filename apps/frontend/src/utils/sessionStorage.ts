@@ -1,4 +1,11 @@
-import type { InterviewStage, Language, Message, TestCase, ValidationResult } from "./types";
+import type {
+  InterviewStage,
+  Language,
+  Message,
+  SessionHistoryEntry,
+  TestCase,
+  ValidationResult,
+} from "./types";
 
 export const SESSION_STORAGE_KEY = "ai-coding-interviewer::session";
 
@@ -10,11 +17,13 @@ export type SessionSlice = {
   chatMessages: Message[];
   validation: ValidationResult;
   stage: InterviewStage;
+  startedAt: number;
 };
 
 export type PersistedData = {
   currentProblemId: string;
   sessions: Record<string, SessionSlice>;
+  history: SessionHistoryEntry[];
 };
 
 export const readPersistedData = (): PersistedData | null => {
@@ -24,6 +33,7 @@ export const readPersistedData = (): PersistedData | null => {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.history) parsed.history = [];
     return parsed as PersistedData;
   } catch {
     return null;

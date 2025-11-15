@@ -31,6 +31,9 @@ Users can solve coding challenges in a realistic coding environment, chat with a
 - **Progress Dashboard**  
   📊 The home page summarizes solved vs. needs-work problems using your latest validation data, all cached locally per session.
 
+- **Session History & Resets**  
+  🗂️ Start a brand-new interview at any time—your previous attempt (language, timestamps, verdict) is archived and surfaced in the “Recent Sessions” panel for easy review.
+
 - **Local Persistence**  
   💾 Code, test cases, chat transcripts, language choice, and validation status auto-save in `localStorage`, so nothing is lost on refresh.
 
@@ -63,8 +66,8 @@ Here’s how the coding interview environment looks right now:
 - [x] AI interviewer chat integration with validation context
 - [x] Test drawer + backend runner
 - [x] Light/Dark theme toggle
-- [ ] Interview agent persona (guided phases, hints, scoring)
-- [ ] Session history / “New Interview” flow
+- [x] Interview agent persona (guided phases, hints, scoring)
+- [x] Session history / “New Interview” flow
 - [ ] Hidden/official test suites
 - [ ] Deployment (Vercel + Railway/Fly.io)
 

@@ -6,6 +6,7 @@ import type {
   ValidationResult,
   Language,
   InterviewStage,
+  SessionHistoryEntry,
 } from "../utils/types";
 import { problems, defaultProblem } from "../data/problems";
 import {
@@ -34,6 +35,8 @@ type InterviewSessionContextType = {
   validationResult: ValidationResult;
   setValidationResult: React.Dispatch<React.SetStateAction<ValidationResult>>;
   invalidateValidation: () => void;
+  sessionHistory: SessionHistoryEntry[];
+  startNewInterview: () => void;
 };
 
 const ALL_LANGUAGES: Language[] = ["python", "javascript"];
@@ -92,6 +95,7 @@ const createDefaultSession = (problem: Problem): SessionSlice => {
     chatMessages: createDefaultChat(),
     validation: createDefaultValidation(),
     stage: "introduction",
+    startedAt: Date.now(),
   };
 };
 
@@ -138,6 +142,7 @@ const hydrateSession = (session: SessionSlice | undefined, problem: Problem): Se
     chatMessages: session.chatMessages ?? createDefaultChat(),
     validation: normalizeValidation(session.validation),
     stage: session.stage ?? "introduction",
+    startedAt: session.startedAt ?? Date.now(),
   };
 };
 
@@ -174,6 +179,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
   const [chatMessages, setChatMessages] = useState<Message[]>(initialSession.chatMessages);
   const [validationResult, setValidationResult] = useState<ValidationResult>(initialSession.validation);
   const [interviewStage, setInterviewStage] = useState<InterviewStage>(initialSession.stage);
+  const [startedAt, setStartedAt] = useState<number>(initialSession.startedAt);
+  const [sessionHistory, setSessionHistory] = useState<SessionHistoryEntry[]>(persisted?.history ?? []);
 
   const code = codeByLanguage[language] ?? getStarterCode(problem, language);
   const setCode = (value: string) => {
@@ -197,6 +204,7 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     setChatMessages(session.chatMessages);
     setValidationResult(session.validation);
     setInterviewStage(session.stage);
+    setStartedAt(session.startedAt);
   };
 
   const setLanguage = (nextLanguage: Language) => {
@@ -209,6 +217,29 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
       if (prev.status === "idle") return prev;
       return { status: "idle" };
     });
+  };
+
+  const startNewInterview = () => {
+    const historyEntry: SessionHistoryEntry = {
+      id: `${currentProblemId}-${Date.now()}`,
+      problemId: currentProblemId,
+      problemTitle: problem.title,
+      language,
+      startedAt,
+      completedAt: Date.now(),
+      status: validationResult.status,
+    };
+    setSessionHistory((prev) => [historyEntry, ...prev]);
+
+    const freshSession = createDefaultSession(problem);
+    setLanguageState(freshSession.language);
+    setCodeByLanguage(freshSession.codeByLanguage);
+    setTestCases(freshSession.testCases);
+    setSelectedTestIndex(freshSession.selectedTestIndex);
+    setChatMessages(freshSession.chatMessages);
+    setValidationResult(freshSession.validation);
+    setInterviewStage(freshSession.stage);
+    setStartedAt(freshSession.startedAt);
   };
 
   useEffect(() => {
@@ -224,7 +255,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const existing = readPersistedData() ?? { currentProblemId: currentProblemId, sessions: {} };
+    const existing =
+      readPersistedData() ?? { currentProblemId: currentProblemId, sessions: {}, history: [] };
     const nextData: PersistedData = {
       currentProblemId: currentProblemId,
       sessions: {
@@ -237,8 +269,10 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
           chatMessages,
           validation: validationResult,
           stage: interviewStage,
+          startedAt,
         },
       },
+      history: sessionHistory,
     };
     writePersistedData(nextData);
   }, [
@@ -250,6 +284,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
     chatMessages,
     validationResult,
     interviewStage,
+    startedAt,
+    sessionHistory,
   ]);
 
   return (
@@ -273,6 +309,8 @@ export const InterviewSessionProvider = ({ children }: { children: React.ReactNo
         validationResult,
         setValidationResult,
         invalidateValidation,
+        sessionHistory,
+        startNewInterview,
       }}
     >
       {children}
